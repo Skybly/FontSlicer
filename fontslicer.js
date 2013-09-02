@@ -47,7 +47,7 @@ function generateGlyph(num, w, h, gfont, color) {
     return data.substring(22);
 }
 
-function generateDownload(gfont,color,size,start,end) {
+function generateDownload(gfont,color,size,start,end,retina,rfont) {
     var zip = new JSZip();
     zip.file("README.txt", "Individual glyphs are in the images directory \nby hex name. See the preview image.\n");
     var can = document.getElementById('canvas');
@@ -62,6 +62,12 @@ function generateDownload(gfont,color,size,start,end) {
             generateGlyph(i,size,size,gfont,color),
             {base64:true}
             );
+        if(retina) {
+            img.file('glyph_'+i.toString(16)+'@2x.png',
+                generateGlyph(i,size*2,size*2,rfont,color),
+                {base64:true}
+                );
+        }
     }
     return zip.generate();
 }

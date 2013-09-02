@@ -68,6 +68,9 @@ canvas { border: 1px solid lightgray; }
         <li><a href=''></a></li>
         -->
     </ul>        
+    
+    <h4>Color picker from</h4>
+    <p><a href='http://www.eyecon.ro/colorpicker/'>EyeCon.ro</a></p>
         
 
 </div>
@@ -86,6 +89,16 @@ canvas { border: 1px solid lightgray; }
         <span class="input-group-addon">px</span>
     </div>
 </div>
+<div class='row'>
+    <div class='col-md-6'></div>
+    <div class="checkbox col-md-6">
+        <label>
+        <input type="checkbox" id='retina'>
+        add retina @2x images
+        </label>
+    </div>
+</div>
+
 
 <div class='row'>
     <div class='col-md-6 text-right'>Start glyph</div>
@@ -230,10 +243,10 @@ $("#preview").click(function() {
 });
 
 
-function calcGlyphFont() {
+function calcGlyphFont(scale) {
     var size = parseInt(document.getElementById('size').value);
     var fname = $('#chosenFont').val();
-    var ptsize = size*0.9;
+    var ptsize = size*0.9*scale;
     var font = ptsize+'px "'+fname+'", sans-serif';
     return font;
 }
@@ -243,7 +256,9 @@ $("#generate").click(function() {
     var start = parseInt(document.getElementById('start').value,16);
     var end   = parseInt(document.getElementById('end').value,16);
     var color = $("#fgcolor div").css('background-color');
-    var content = generateDownload(calcGlyphFont(),color,size,start,end);
+    var retina = $("#retina").prop('checked');
+    console.log("retina = " + retina);
+    var content = generateDownload(calcGlyphFont(1),color,size,start,end,retina,calcGlyphFont(2));
     location.href="data:application/zip;base64,"+content;
 });
 
