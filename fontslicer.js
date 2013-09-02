@@ -1,4 +1,4 @@
-function generateFullPreview(start,end, size, gfont, tfont) {
+function generateFullPreview(start,end, size, gfont, tfont,color) {
     var canvas = document.createElement('canvas');
     var len = end-start;
     var gridWidth = 20;
@@ -6,7 +6,7 @@ function generateFullPreview(start,end, size, gfont, tfont) {
     canvas.width = size*gridWidth;
     canvas.height = (size+40)*(gridHeight+1);
     var ctx = canvas.getContext('2d');
-    ctx.fillStyle = 'black';
+    ctx.fillStyle = color;
     ctx.textBaseline = 'middle';
     ctx.textAlign = 'center';
     var ctx = canvas.getContext('2d');
@@ -30,12 +30,12 @@ function drawGlyph(ctx,num,size,gfont,tfont) {
     ctx.fillText(String.fromCharCode(num),0,0);
 }
 
-function generateGlyph(num, w, h, gfont) {
+function generateGlyph(num, w, h, gfont, color) {
     var canvas = document.createElement('canvas');
     canvas.width = w;
     canvas.height = h;
     var ctx = canvas.getContext('2d');
-    ctx.fillStyle = 'black';
+    ctx.fillStyle = color;
     //ctx.font = (w*0.9)+'px "FontAwesome"';
     ctx.font = gfont;
     ctx.textBaseline = 'middle';
@@ -47,19 +47,19 @@ function generateGlyph(num, w, h, gfont) {
     return data.substring(22);
 }
 
-function generateDownload(gfont,size,start,end) {
+function generateDownload(gfont,color,size,start,end) {
     var zip = new JSZip();
     zip.file("README.txt", "Individual glyphs are in the images directory \nby hex name. See the preview image.\n");
     var can = document.getElementById('canvas');
     var dataURL = can.toDataURL("image/png");
     zip.file("preview.png",
-        generateFullPreview(start, end, size, gfont, tfont),
+        generateFullPreview(start, end, size, gfont, tfont,color),
         {base64: true}
         );
     var img = zip.folder("images");
     for(var i=start; i<=end; i++) {
         img.file('glyph_'+i.toString(16)+'.png',
-            generateGlyph(i,size,size,gfont),
+            generateGlyph(i,size,size,gfont,color),
             {base64:true}
             );
     }
