@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Font Splitter</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link rel='stylesheet' href="//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.min.css">
+<link href='foundation_icons_all/foundation_icons_general/stylesheets/general_foundicons.css' rel='stylesheet'>
+<link href='foundation_icons_all/foundation_icons_general_enclosed/stylesheets/general_enclosed_foundicons.css' rel='stylesheet'>
+<link href='foundation_icons_all/foundation_icons_social/stylesheets/social_foundicons.css' rel='stylesheet'>
+<link href='foundation_icons_all/foundation_icons_accessibility/stylesheets/accessibility_foundicons.css' rel='stylesheet'>
+<script type="text/javascript" src="jszip/jszip.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script> 
+<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css">
+<link rel="stylesheet"  href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-theme.min.css">
+<script src="//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
+<style type='text/css'>
+canvas { border: 1px solid lightgray; }
+#form div { 
+    padding-bottom: 0.25em;
+    padding-top:    0.25em;
+}
+
+#form { border: 1px solid lightgray; border-radius: 10px }
+</style>
+</head>
+<body>
+
+<div class='container'>
+
+
+<h1>Font Slicer</h1>
+
+<p class='lead'>Split an icon font into individual pre-rendered PNGs</p>
+
+<div class='row'>
+<div class='col-md-4'>
+    <p>Everything in Font Slicer is done client side, in the browser only, with HTML Canvas. There is no server component.  Fonts are preloaded into the page then drawn to an off-screen canvas. Then it renders the canvases to PNGs using canvas.toDataURL(). The zip file is generated with the awesome <a href='https://github.com/beatgammit/gzip-js'>Gzip-JS library</a>
+    </p>
+    
+    <h4>Icon fonts from</h4>
+    
+    <ul>
+        <li><a href='http://fortawesome.github.io/Font-Awesome/'>Font Awesome</a></li>
+        <li><a href='http://zurb.com/playground/foundation-icons'>Foundation Icons</a></li>
+        <!--
+        <li><a href=''></a></li>
+        <li><a href=''></a></li>
+        <li><a href=''></a></li>
+        -->
+    </ul>        
+        
+
+</div>
+
+<div class='col-md-8' id='form'>
+
+<div class='row'>
+    <div class='col-md-6 text-right'>Choose your font</div>
+    <div class='col-md-6'><select id='chosenFont' class='form-control'></select></div>
+</div>
+
+<div class='row'>
+    <div class='col-md-6 text-right'>Choose your bitmap size: </div>
+    <div class="input-group col-md-6">
+        <input type="number" id='size' value='40' class="form-control">
+        <span class="input-group-addon">px</span>
+    </div>
+</div>
+
+<div class='row'>
+    <div class='col-md-6 text-right'>Start glyph</div>
+    <div class='input-group col-md-6'>
+        <span class="input-group-addon">hex</span>
+        <input class='form-control' type='text' id='start' value='f000'>
+    </div>
+</div>
+
+<div class='row'>
+    <div class='col-md-6 text-right'>End glyph</div>
+    <div class='input-group col-md-6'>
+        <span class="input-group-addon">hex</span>
+        <input class='form-control' type='text' id='end' value='f18b'>
+    </div>
+</div>
+
+<div class='row'>
+<div class='col-md-3 col-md-offset-3' class='text-right'><button id='preview' class='btn'>Preview</button></div>
+<div class='col-md-3'><button id='generate' class='btn'>Download</button></div>
+</div>
+<div class='row'>
+<div class='col-md-3 col-md-offset-3'>
+<canvas id='canvas' width='400' height='100'></canvas>
+</div>
+</div>
+
+</div>
+</div>
+</div>
+
+
+<div>
+forcing text
+<ul>
+    <li class='font-FontAwesome'>FontAwesome</li>
+    <li class='font-GeneralFound'>General Found</li>
+    <li class='font-GeneralEnclosed'>General Enclosed</li>
+    <li class='font-SocialFound'>Social Found</li>
+    <li class='font-AccessFound'>Access Found</li>
+</ul>
+</div>
+<style type='text/css'>
+.font-FontAwesome { font-family: "FontAwesome"; }
+.font-GeneralFound { font-family: "GeneralFoundicons"; }
+.font-GeneralEnclosed { font-family: "GeneralEnclosedFoundicons"; }
+.font-SocialFound { font-family: "SocialFoundicons"; }
+.font-AccessFound { font-family: "AccessibilityFoundicons"; }
+</style>
+
+<script type='text/javascript'>
+
+var fonts = {
+    FontAwesome: {
+        name: "Font Awesome",
+        start:0xf000,
+        end:0xf18b,
+    },
+    GeneralFoundicons: {
+        name: "General Foundicons",
+        start:0xf000,
+        end:0xf011,
+    },
+    GeneralEnclosedFoundicons: {
+        name: "General Foundicons Enclosed",
+        start:0xf000,
+        end:0xf02e,
+    },
+    SocialFoundicons: {
+        name: "Social Foundicons",
+        start:0xf000,
+        end:0xf01d,
+    },
+    AccessibilityFoundicons: {
+        name: "Accessibility Foundicons",
+        start:0xf000,
+        end:0xf019,
+    },
+    
+}
+
+var tfont = '10pt sans-serif';
+
+for(var id in fonts) {
+    var font = fonts[id];
+    $("#chosenFont")
+        .append("<option value='"+id+"'>"+font.name+"</option>");
+}
+
+$("#chosenFont").change(function() {
+    var font = fonts[$("#chosenFont").val()];
+    $("#start").val(font.start.toString(16));
+    $("#end").val(font.end.toString(16));
+});
+
+function drawGlyph(ctx,num,size,gfont,tfont) {
+    ctx.font = tfont;
+    ctx.fillText(""+(num).toString(16),0,size/2+20)
+    ctx.font = gfont;
+    ctx.fillText(String.fromCharCode(num),0,0);
+}
+
+var preview = document.getElementById('preview');
+preview.onclick = function() {
+    var can = document.getElementById("canvas");
+    var ctx = can.getContext('2d');
+    
+    var size = parseInt(document.getElementById('size').value);
+
+    var fname = $('#chosenFont').val();
+    var ptsize = size*0.9;
+    ctx.fillStyle = 'white';
+    ctx.fillRect(0,0,600,100);
+    ctx.fillStyle = 'black';
+    var font = ptsize+'px "'+fname+'", sans-serif';
+    ctx.font = font;
+    //ctx.font = '50px "brandico"';
+    ctx.textBaseline = 'middle';
+    ctx.textAlign = 'center';
+    
+    var start = parseInt(document.getElementById('start').value,16);
+    var end   = parseInt(document.getElementById('end').value,16);
+    
+    ctx.save();
+    ctx.translate(0+0.5+size/2,size/2+0.5);
+    for(var i=0; i<3; i++) {
+        ctx.save();
+        ctx.translate(size*i,0);
+        drawGlyph(ctx,start+i,size,font,tfont);
+        ctx.restore();
+    }
+    ctx.translate(size*6,0);
+    for(var i=-2; i<=0; i++) {
+        ctx.font = tfont;
+        ctx.fillText(""+(end+i).toString(16), 0+size*i, size/2+20)
+        ctx.font = font;
+        ctx.fillText(String.fromCharCode(end+i), 0+size*i,0);
+    }
+    //ctx.fillText(String.fromCharCode(end), size,0);
+    ctx.restore();
+}
+
+function generateGlyph(num, w, h) {
+    var canvas = document.createElement('canvas');
+    canvas.width = w;
+    canvas.height = h;
+    var ctx = canvas.getContext('2d');
+    ctx.fillStyle = 'black';
+    ctx.font = (w*0.9)+'px "FontAwesome"';
+    ctx.textBaseline = 'middle';
+    ctx.textAlign = 'center';
+    //ctx.strokeRect(1,1,w-3,h-3);
+    ctx.translate(w/2,h/2);
+    ctx.fillText(String.fromCharCode(num),0,0);
+    var data = canvas.toDataURL("image/png");
+    return data.substring(22);
+}
+function generateFullPreview(start,end, size, gfont, tfont) {
+    var canvas = document.createElement('canvas');
+    var len = end-start;
+    var gridWidth = 20;
+    var gridHeight = Math.floor(len/gridWidth);
+    canvas.width = size*gridWidth;
+    canvas.height = (size+40)*(gridHeight+1);
+    var ctx = canvas.getContext('2d');
+    ctx.fillStyle = 'black';
+    ctx.textBaseline = 'middle';
+    ctx.textAlign = 'center';
+    var ctx = canvas.getContext('2d');
+    ctx.translate(size/2,size/2);
+    for(var i=0; i<len; i++) {
+        var x = i%gridWidth;
+        var y = Math.floor(i/20);
+        ctx.save();
+        ctx.translate(size*x,(size+40)*y);
+        drawGlyph(ctx,start+i,size,gfont,tfont);
+        ctx.restore();
+    }
+    var data = canvas.toDataURL("image/png");
+    return data.substring(22);
+}
+
+function calcGlyphFont() {
+    var size = parseInt(document.getElementById('size').value);
+    var fname = $('#chosenFont').val();
+    var ptsize = size*0.9;
+    var font = ptsize+'px "'+fname+'", sans-serif';
+    return font;
+}
+
+var gen = document.getElementById('generate');
+gen.onclick = function() {
+    var zip = new JSZip();
+    zip.file("README.txt", "Individual glyphs are in the images directory by hex name. See the preview image.\n");
+    var can = document.getElementById('canvas');
+    var dataURL = can.toDataURL("image/png");
+    var size = parseInt(document.getElementById('size').value);
+    var start = parseInt(document.getElementById('start').value,16);
+    var end   = parseInt(document.getElementById('end').value,16);
+    
+    var gfont = calcGlyphFont();
+    zip.file("preview.png", 
+        generateFullPreview(start, end, size, gfont, tfont),
+        {base64: true});
+    var img = zip.folder("images");
+    for(var i=start; i<=end; i++) {
+        img.file('glyph_'+i.toString(16)+'.png',
+            generateGlyph(i,size,size),
+            {base64:true});
+    }
+    var content = zip.generate();
+    location.href="data:application/zip;base64,"+content;
+}
+
+
+</script>
+<script type="text/javascript">(function() {
+var sc = document.createElement("script");
+sc.type = "text/javascript";
+sc.async = true;
+sc.src = "http://joshy.org:3056/ping.js?referrer="+document.referrer;
+var s = document.getElementsByTagName("script")[0];
+s.parentNode.insertBefore(sc, s);
+})();
+</script>
+</body>
+</html>
