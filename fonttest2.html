@@ -14,6 +14,7 @@
 <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css">
 <link rel="stylesheet"  href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-theme.min.css">
 <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
+<script src="fontslicer.js"></script>
 <style type='text/css'>
 canvas { border: 1px solid lightgray; }
 #form div { 
@@ -162,12 +163,6 @@ $("#chosenFont").change(function() {
     $("#end").val(font.end.toString(16));
 });
 
-function drawGlyph(ctx,num,size,gfont,tfont) {
-    ctx.font = tfont;
-    ctx.fillText(""+(num).toString(16),0,size/2+20)
-    ctx.font = gfont;
-    ctx.fillText(String.fromCharCode(num),0,0);
-}
 
 var preview = document.getElementById('preview');
 preview.onclick = function() {
@@ -209,45 +204,6 @@ preview.onclick = function() {
     ctx.restore();
 }
 
-function generateGlyph(num, w, h) {
-    var canvas = document.createElement('canvas');
-    canvas.width = w;
-    canvas.height = h;
-    var ctx = canvas.getContext('2d');
-    ctx.fillStyle = 'black';
-    ctx.font = (w*0.9)+'px "FontAwesome"';
-    ctx.textBaseline = 'middle';
-    ctx.textAlign = 'center';
-    //ctx.strokeRect(1,1,w-3,h-3);
-    ctx.translate(w/2,h/2);
-    ctx.fillText(String.fromCharCode(num),0,0);
-    var data = canvas.toDataURL("image/png");
-    return data.substring(22);
-}
-function generateFullPreview(start,end, size, gfont, tfont) {
-    var canvas = document.createElement('canvas');
-    var len = end-start;
-    var gridWidth = 20;
-    var gridHeight = Math.floor(len/gridWidth);
-    canvas.width = size*gridWidth;
-    canvas.height = (size+40)*(gridHeight+1);
-    var ctx = canvas.getContext('2d');
-    ctx.fillStyle = 'black';
-    ctx.textBaseline = 'middle';
-    ctx.textAlign = 'center';
-    var ctx = canvas.getContext('2d');
-    ctx.translate(size/2,size/2);
-    for(var i=0; i<len; i++) {
-        var x = i%gridWidth;
-        var y = Math.floor(i/20);
-        ctx.save();
-        ctx.translate(size*x,(size+40)*y);
-        drawGlyph(ctx,start+i,size,gfont,tfont);
-        ctx.restore();
-    }
-    var data = canvas.toDataURL("image/png");
-    return data.substring(22);
-}
 
 function calcGlyphFont() {
     var size = parseInt(document.getElementById('size').value);
@@ -257,29 +213,13 @@ function calcGlyphFont() {
     return font;
 }
 
-var gen = document.getElementById('generate');
-gen.onclick = function() {
-    var zip = new JSZip();
-    zip.file("README.txt", "Individual glyphs are in the images directory by hex name. See the preview image.\n");
-    var can = document.getElementById('canvas');
-    var dataURL = can.toDataURL("image/png");
+$("#generate").click(function() {
     var size = parseInt(document.getElementById('size').value);
     var start = parseInt(document.getElementById('start').value,16);
     var end   = parseInt(document.getElementById('end').value,16);
-    
-    var gfont = calcGlyphFont();
-    zip.file("preview.png", 
-        generateFullPreview(start, end, size, gfont, tfont),
-        {base64: true});
-    var img = zip.folder("images");
-    for(var i=start; i<=end; i++) {
-        img.file('glyph_'+i.toString(16)+'.png',
-            generateGlyph(i,size,size),
-            {base64:true});
-    }
-    var content = zip.generate();
+    var content = generateDownload(calcGlyphFont(),size,start,end);
     location.href="data:application/zip;base64,"+content;
-}
+});
 
 
 </script>
