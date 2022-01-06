@@ -69,9 +69,13 @@ function generateDownload(gfont,color,size,start,end,retina,rfont) {
                 );
         }
     }
-    zip.generateAsync({type:"uint8array"})
-    .then(function (content) {
-    return content;
+    
+    return zip.generateAsync({type:"blob"})
+        .then(function (blob) {
+        saveAs(blob, "result.zip");
+    } 
+}
+        
 });
 }
 
