@@ -76,7 +76,5 @@ function generateDownload(gfont,color,size,start,end,retina,rfont) {
         console.log(err);
     });
 }
-        
-});
-}
+
 
