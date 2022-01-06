@@ -222,8 +222,7 @@ $("#generate").click(function() {
     var color = $("#fgcolor div").css('background-color');
     var retina = $("#retina").prop('checked');
     console.log("retina = " + retina);
-    var content = generateDownload(calcGlyphFont(1),color,size,start,end,retina,calcGlyphFont(2));
-    location.href="data:application/zip;base64,"+content;
+    var content = generateDownload(calcGlyphFont(1),color,size,start,end,retina,calcGlyphFont(2));    
 });
 
 
