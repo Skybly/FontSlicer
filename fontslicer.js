@@ -70,10 +70,11 @@ function generateDownload(gfont,color,size,start,end,retina,rfont) {
         }
     }
     
-    return zip.generateAsync({type:"blob"})
-        .then(function (blob) {
-        saveAs(blob, "result.zip");
-    } 
+    zip.generateAsync({type:"blob"}).then(function (blob) { 
+        saveAs(blob, "glyphs.zip");                          
+    }, function (err) {
+        console.log(err);
+    });
 }
         
 });
